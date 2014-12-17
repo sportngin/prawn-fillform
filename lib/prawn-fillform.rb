@@ -1,6 +1,7 @@
 # -*- encoding : utf-8 -*-
 require 'prawn-fillform/version'
 require 'open-uri'
+require 'prawn-qrcode'
 
 OpenURI::Buffer.send :remove_const, 'StringMax' if OpenURI::Buffer.const_defined?('StringMax')
 OpenURI::Buffer.const_set 'StringMax', 0
@@ -103,6 +104,10 @@ module Prawn
 
       def type
         :text
+      end
+
+      def symbology
+        deref(@dictionary[:PMD]).try(:[], :Symbology)
       end
     end
 
@@ -254,18 +259,28 @@ module Prawn
             y_offset = options[:y_offset] || self.class.fillform_y_offset
 
             if field.type == :text
-              fill_color options[:font_color] || field.font_color
+              # Add support for QRCode form fields
+              if field.symbology == :QRCode
+                bounding_box([field.x + x_offset, field.y + y_offset], :width => field.width, :height => field.height) do
+                  print_qr_code value,
+                    :position => options[:position] || :center,
+                    :vposition => options[:vposition] || :center,
+                    :fit => options[:fit] || [field.width, field.height]
+                end
+              else
+                fill_color options[:font_color] || field.font_color
 
-	      font options[:font_face]
-              text_box value, :at => [field.x + x_offset, field.y + y_offset],
-                                    :align => options[:align] || field.align,
-                                    :width => options[:width] || field.width,
-                                    :height => options[:height] || field.height,
-                                    :valign => options[:valign] || :center,
+                font options[:font_face]
+                text_box value, :at => [field.x + x_offset, field.y + y_offset],
+                                      :align => options[:align] || field.align,
+                                      :width => options[:width] || field.width,
+                                      :height => options[:height] || field.height,
+                                      :valign => options[:valign] || :center,
 
-                                    # Default to the document font size if the field size is 0
-                                    :size => options[:font_size] || ((size = field.font_size) > 0.0 ? size : font_size),
-                                    :style => options[:font_style] || field.font_style
+                                      # Default to the document font size if the field size is 0
+                                      :size => options[:font_size] || ((size = field.font_size) > 0.0 ? size : font_size),
+                                      :style => options[:font_style] || field.font_style
+              end
             elsif field.type == :checkbox
               is_yes = (v = value.downcase) == "yes" || v == "1" || v == "true"
 
