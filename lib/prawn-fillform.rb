@@ -102,6 +102,10 @@ module Prawn
         Prawn::Graphics::Color.rgb2hex(deref(@dictionary[:DA]).split(" ")[3..5].collect { |e| e.to_f * 255 }).to_s
       end
 
+      def font_face
+        
+      end
+
       def type
         :text
       end
@@ -270,7 +274,7 @@ module Prawn
               else
                 fill_color options[:font_color] || field.font_color
 
-                font options[:font_face]
+                font options[:font_face] || field.font_face
                 text_box value, :at => [field.x + x_offset, field.y + y_offset],
                                       :align => options[:align] || field.align,
                                       :width => options[:width] || field.width,
