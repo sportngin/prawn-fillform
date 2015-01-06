@@ -275,7 +275,7 @@ module Prawn
               else
                 fill_color options[:font_color] || field.font_color
 
-                font options[:font_face] || field.font_face
+                font options[:font_face] if options[:font_face]
                 text_box value, :at => [field.x + x_offset, field.y + y_offset],
                                       :align => options[:align] || field.align,
                                       :width => options[:width] || field.width,
@@ -291,7 +291,7 @@ module Prawn
 
               formatted_text_box [{
                   text: is_yes ? Checkbox::YES : Checkbox::NO,
-                  font: options[:font_face] || field.font_face || "#{Prawn::BASEDIR}/data/fonts/DejaVuSans.ttf",
+                  font: options[:font_face] || "#{Prawn::BASEDIR}/data/fonts/DejaVuSans.ttf",
                   size: field.font_size,
                   styles: [field.font_style]
                 }],
