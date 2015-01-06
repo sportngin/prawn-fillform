@@ -104,7 +104,7 @@ module Prawn
 
       def font_face
         return nil unless deref(@dictionary[:DA])
-        deref(@dictionary[:DA]).split(" ")[0].split(",").first.to_s.downcase
+        deref(@dictionary[:DA]).split(" ")[0].split(",").first.to_s.downcase.gsub("/","")
       end
 
       def type
