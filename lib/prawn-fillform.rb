@@ -103,7 +103,8 @@ module Prawn
       end
 
       def font_face
-        
+        return nil unless deref(@dictionary[:DA])
+        deref(@dictionary[:DA]).split(" ")[0].split(",").first.to_s.downcase
       end
 
       def type
@@ -290,7 +291,7 @@ module Prawn
 
               formatted_text_box [{
                   text: is_yes ? Checkbox::YES : Checkbox::NO,
-                  font: "#{Prawn::BASEDIR}/data/fonts/DejaVuSans.ttf",
+                  font: options[:font_face] || field.font_face || "#{Prawn::BASEDIR}/data/fonts/DejaVuSans.ttf",
                   size: field.font_size,
                   styles: [field.font_style]
                 }],
