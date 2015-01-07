@@ -13,8 +13,9 @@ module Prawn
     class Field
       include Prawn::Document::Internals
 
-      def initialize(dictionary)
+      def initialize(dictionary, acro_form)
         @dictionary = dictionary
+        @acro_form = acro_form
       end
 
       def description
@@ -100,6 +101,12 @@ module Prawn
       def font_color
         return "0000" unless deref(@dictionary[:DA])
         Prawn::Graphics::Color.rgb2hex(deref(@dictionary[:DA]).split(" ")[3..5].collect { |e| e.to_f * 255 }).to_s
+      end
+
+      def font_face
+        return nil unless deref(@dictionary[:DA]) && @acro_form[:DR]
+        fonts = @acro_form[:DR][:Font]
+        deref(fonts[@dictionary[:DA].try(:match, /\/(\S+)/).try(:[], 1).try(:to_sym)]).try(:[], :BaseFont).try(:to_s).try(:slice, /([^,]+)/)
       end
 
       def type
@@ -224,14 +231,16 @@ module Prawn
             next unless (deref(dictionary[:FT]) == :Tx || deref(dictionary[:FT]) == :Btn)
 
             type = deref(dictionary[:FT]).to_sym
+            root = deref(state.store.root)
+            acro_form = deref(root[:AcroForm])
             case type
             when :Tx
-              acroform[page_number] << Text.new(dictionary)
+              acroform[page_number] << Text.new(dictionary, acro_form)
             when :Btn
               if deref(dictionary[:AP]).has_key? :D
-                acroform[page_number] << Checkbox.new(dictionary)
+                acroform[page_number] << Checkbox.new(dictionary, acro_form)
               else
-                acroform[page_number] << Button.new(dictionary)
+                acroform[page_number] << Button.new(dictionary, acro_form)
               end
             end
           end
@@ -269,8 +278,11 @@ module Prawn
                 end
               else
                 fill_color options[:font_color] || field.font_color
-
-                font options[:font_face]
+                begin
+                  font options[:font_face] || field.font_face
+                rescue => e
+                  font "Helvetica"
+                end
                 text_box value, :at => [field.x + x_offset, field.y + y_offset],
                                       :align => options[:align] || field.align,
                                       :width => options[:width] || field.width,
@@ -286,7 +298,7 @@ module Prawn
 
               formatted_text_box [{
                   text: is_yes ? Checkbox::YES : Checkbox::NO,
-                  font: "#{Prawn::BASEDIR}/data/fonts/DejaVuSans.ttf",
+                  font: options[:font_face] || "#{Prawn::BASEDIR}/data/fonts/DejaVuSans.ttf",
                   size: field.font_size,
                   styles: [field.font_style]
                 }],
