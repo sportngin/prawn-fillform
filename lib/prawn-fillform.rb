@@ -174,8 +174,8 @@ module Prawn
         end
 
         root = deref(@state.store.root)
-        acro_form = deref(root[:AcroForm])
-        form_fields = deref(acro_form[:Fields])
+        acro_form = root.present? ? deref(root[:AcroForm]) : {}
+        form_fields = acro_form.present? ? deref(acro_form[:Fields]) : {}
 
         @state.pages.each_with_index do |page, i|
           form_fields.map do |ref|
