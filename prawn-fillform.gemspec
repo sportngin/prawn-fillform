@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "prawn"
   s.add_dependency "prawn-qrcode"
+  s.add_dependency "prawn-svg"
 
   # specify any dependencies here; for example:
   # s.add_development_dependency "rspec"
