@@ -2,6 +2,7 @@
 require 'prawn-fillform/version'
 require 'open-uri'
 require 'prawn/qrcode'
+require 'prawn-svg'
 
 OpenURI::Buffer.send :remove_const, 'StringMax' if OpenURI::Buffer.const_defined?('StringMax')
 OpenURI::Buffer.const_set 'StringMax', 0
@@ -311,6 +312,10 @@ module Prawn
                   image open(value), :position => options[:position] || :center,
                                   :vposition => options[:vposition] || :center,
                                   :fit => options[:fit] || [field.width, field.height]
+                elsif value =~ /svg/
+                  svg open(value), :position => options[:position] || :center,
+                    :vposition => options[:vposition] || :center,
+                    :width => field.width, :height => field.height
                 else
                   image value, :position => options[:position] || :center,
                                   :vposition => options[:vposition] || :center,
